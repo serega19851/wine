@@ -1,3 +1,4 @@
+import argparse
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from jinja2 import Environment, FileSystemLoader, select_autoescape
 import datetime
@@ -21,9 +22,9 @@ def get_correct_form_word(year):
     return 'лет'
 
 
-def get_categorys():
+def get_categories(file_path):
     wine_catalog = pandas.read_excel(
-        'wine3.xlsx',
+        file_path,                 #'wine3.xlsx',
         keep_default_na=False
     ).to_dict(orient='records')
 
@@ -35,6 +36,18 @@ def get_categorys():
     return catalog
 
 
+def get_file_path():
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "file_path",
+        default='wine3.xlsx',
+        nargs='?',
+        help="In enter the path of the file with the extension .xlsx"
+    )
+    args = parser.parse_args()
+    return args.file_path
+
+
 def main():
     env = Environment(
         loader=FileSystemLoader('.'),
@@ -44,7 +57,7 @@ def main():
     template = env.get_template('template.html')
 
     rendered_page = template.render(
-        categorys=get_categorys(),
+        categories=get_categories(get_file_path()),
         company_age=get_company_age(),
         form_word=get_correct_form_word(get_company_age()),
     )
